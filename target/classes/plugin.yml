@@ -1,0 +1,6 @@
+name: 'iEncantamentos'
+version: '1.0'
+main: 'network.insane.iencantamentos.Main'
+
+commands:
+  ie:
