@@ -17,7 +17,7 @@ import java.util.List;
 public class EnchantGUI implements Listener {
     private Plugin plugin = Main.getPlugin(Main.class);
 
-    public void newInventory(Player player) {
+    public void EnchantInventory(Player player) {
         Inventory i = plugin.getServer().createInventory(null, 9 * 5, ChatColor.DARK_PURPLE + "Feiticeiro");
         int xp = player.getTotalExperience();
 
@@ -110,7 +110,7 @@ public class EnchantGUI implements Listener {
 
         // Livros de Encantamentos
         // Simples
-        int eBookSimpleCost = 2000;
+        int eBookSimpleCost = 1500;
         String eBookSimpleType = "Simples";
         ItemStack eBookSimple = new ItemStack(Material.BOOK);
         ItemMeta eBookSimpleMeta = eBookSimple.getItemMeta();
@@ -126,6 +126,24 @@ public class EnchantGUI implements Listener {
         eBookSimpleMeta.setLore(eBookSimpleLore);
         eBookSimple.setItemMeta(eBookSimpleMeta);
         i.setItem(24, eBookSimple);
+
+        // Normal
+        int eBookNormalCost = 2000;
+        String eBookNormalType = "Normal";
+        ItemStack eBookNormal = new ItemStack(Material.BOOK);
+        ItemMeta eBookNormalMeta = eBookNormal.getItemMeta();
+        eBookNormalMeta.setDisplayName(ChatColor.YELLOW + "Livro de Encantamentos");
+        List<String> eBookNormalLore = new ArrayList<>();
+        eBookNormalLore.add(ChatColor.GRAY + "Tipo: " + ChatColor.WHITE + eBookNormalType);
+        eBookNormalLore.add("");
+        eBookNormalLore.add(ChatColor.GRAY + "Clique com o " + ChatColor.WHITE + "botão direito " + ChatColor.GRAY + "para ver ");
+        eBookNormalLore.add(ChatColor.GRAY + "os encantamentos do tipo " + eBookNormalType.toLowerCase());
+        eBookNormalLore.add("");
+        eBookNormalLore.add(ChatColor.WHITE + "Custo: " + ChatColor.GREEN + eBookNormalCost);
+
+        eBookNormalMeta.setLore(eBookNormalLore);
+        eBookNormal.setItemMeta(eBookNormalMeta);
+        i.setItem(25, eBookNormal);
 
         // Avançado
         int eBookAdvancedCost = 3500;

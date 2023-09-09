@@ -13,6 +13,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import network.insane.iencantamentos.listeners.SimpleEnchantsGUI;
+import network.insane.iencantamentos.listeners.NormalEnchantsGUI;
 import network.insane.iencantamentos.listeners.AdvancedEnchantsGUI;
 
 import java.util.ArrayList;
@@ -26,7 +28,14 @@ public class InventoryEvent implements Listener {
         Inventory open = player.getOpenInventory().getTopInventory();
         Inventory openLower = player.getOpenInventory().getBottomInventory();
         ItemStack item = event.getCurrentItem();
-        ItemStack[] inventoryContents = player.getInventory().getContents();
+        String totalFraskType = "Frasco de Experiência";
+        String advancedFraskType = "Frasco de Experiência Avançado";
+        String normalFraskType = "Frasco de Experiência Normal";
+        String simpleFraskType = "Frasco de Experiência Simples";
+        String eBookSimpleType = "Simples";
+        String eBookNormalType = "Normal";
+        String eBookAdvancedType = "Avançado";
+
 
         if (item == null || open == null) {
             return;
@@ -45,7 +54,7 @@ public class InventoryEvent implements Listener {
                     event.setCancelled(true);
                 } else {
                     // Verificar se o player clicou em um custom frasco xp total
-                    if (customXpBottle(item)) {
+                    if (customXpBottle(totalFraskType, item)) {
                         if(player.getInventory().firstEmpty() != -1) {
                             // Obter a quantidade de xp armazenada no frasco
                             int xpAmount = getStoredExperience(item);
@@ -55,7 +64,7 @@ public class InventoryEvent implements Listener {
                                 event.setCurrentItem(null);
 
                                 // Criar um frasco de xp custom
-                                ItemStack xpBottle = createCustomXpBottle(xpAmount);
+                                ItemStack xpBottle = createCustomXpBottle(totalFraskType, xpAmount);
                                 ItemMeta meta = xpBottle.getItemMeta();
 
                                 if (meta.hasDisplayName() && meta.getDisplayName().equals(ChatColor.YELLOW + "Frasco de Experiência")) {
@@ -73,16 +82,17 @@ public class InventoryEvent implements Listener {
                                 }
                             }
                         } else {
-                            player.sendMessage(ChatColor.RED + "Seu inventário está cheio. Libere espaço antes de usar seu frasco.");
+                            player.sendMessage(ChatColor.RED + "Seu inventário está cheio. Libere espaço antes de adquirir seu frasco.");
                         }
                     }
 
-                    // Frasco de Experiência Avançado
+                    // Sistema dos Frasco Custom
                     if (item.getType() == Material.EXP_BOTTLE && item.hasItemMeta()) {
                         ItemMeta meta = item.getItemMeta();
 
-                        if (meta.hasDisplayName() && meta.getDisplayName().equals(ChatColor.YELLOW + "Frasco de Experiência Avançado")) {
-                            if(player.getInventory().firstEmpty() != -1) {
+                        // Frasco de Experiência Avançado
+                        if (meta.hasDisplayName() && meta.getDisplayName().equals(ChatColor.YELLOW + advancedFraskType)) {
+                            if(isValidStackFrask(player, item, advancedFraskType) || player.getInventory().firstEmpty() != -1) {
                                 // Xp Avançado
                                 int xpAdvancedCost = 5000;
                                 int xp = player.getTotalExperience();
@@ -91,7 +101,7 @@ public class InventoryEvent implements Listener {
                                     player.setTotalExperience(xp - xpAdvancedCost);
                                     player.setLevel(0);
                                     // Criar um frasco de xp avançado para o jogador
-                                    ItemStack advancedXpBottle = createCustomXpBottle(xpAdvancedCost);
+                                    ItemStack advancedXpBottle = createCustomXpBottle(advancedFraskType, xpAdvancedCost);
                                     player.getInventory().addItem(advancedXpBottle);
 
                                     //Atualizar item do minecart no inventario do jogador
@@ -105,11 +115,11 @@ public class InventoryEvent implements Listener {
                                     player.sendMessage(ChatColor.RED + "Você não possui XP suficiente!");
                                 }
                             } else {
-                                player.sendMessage(ChatColor.RED + "Seu inventário está cheio. Libere espaço antes de usar seu frasco.");
+                                player.sendMessage(ChatColor.RED + "Seu inventário está cheio. Libere espaço antes de adquirir seu frasco.");
                             }
                         // Frasco de Experiência Normal
-                        } else if (meta.hasDisplayName() && meta.getDisplayName().equals(ChatColor.YELLOW + "Frasco de Experiência Normal")) {
-                            if (player.getInventory().firstEmpty() != -1) {
+                        } else if (meta.hasDisplayName() && meta.getDisplayName().equals(ChatColor.YELLOW + normalFraskType)) {
+                            if (isValidStackFrask(player, item, normalFraskType) || player.getInventory().firstEmpty() != -1) {
                                 // Xp Normal
                                 int xpNormalCost = 2000;
                                 int xp = player.getTotalExperience();
@@ -118,7 +128,7 @@ public class InventoryEvent implements Listener {
                                     player.setTotalExperience(xp - xpNormalCost);
                                     player.setLevel(0);
                                     // Criar um frasco de xp avançado para o jogador
-                                    ItemStack normalXpBottle = createCustomXpBottle(xpNormalCost);
+                                    ItemStack normalXpBottle = createCustomXpBottle(normalFraskType, xpNormalCost);
                                     player.getInventory().addItem(normalXpBottle);
 
                                     //Atualizar item do minecart no inventario do jogador
@@ -132,11 +142,11 @@ public class InventoryEvent implements Listener {
                                     player.sendMessage(ChatColor.RED + "Você não possui XP suficiente!");
                                 }
                             } else {
-                                player.sendMessage(ChatColor.RED + "Seu inventário está cheio. Libere espaço antes de usar seu frasco.");
+                                player.sendMessage(ChatColor.RED + "Seu inventário está cheio. Libere espaço antes de adquirir seu frasco.");
                             }
                         // Frasco de Experiência Simples
-                        } else if (meta.hasDisplayName() && meta.getDisplayName().equals(ChatColor.YELLOW + "Frasco de Experiência Simples")) {
-                            if (player.getInventory().firstEmpty() != -1) {
+                        } else if (meta.hasDisplayName() && meta.getDisplayName().equals(ChatColor.YELLOW + simpleFraskType)) {
+                            if (isValidStackFrask(player, item, simpleFraskType) || player.getInventory().firstEmpty() != -1) {
                                 // Xp Simples
                                 int xpSimpleCost = 1500;
                                 int xp = player.getTotalExperience();
@@ -145,7 +155,7 @@ public class InventoryEvent implements Listener {
                                     player.setTotalExperience(xp - xpSimpleCost);
                                     player.setLevel(0);
                                     // Criar um frasco de xp avançado para o jogador
-                                    ItemStack simpleXpBottle = createCustomXpBottle(xpSimpleCost);
+                                    ItemStack simpleXpBottle = createCustomXpBottle(simpleFraskType, xpSimpleCost);
                                     player.getInventory().addItem(simpleXpBottle);
 
                                     //Atualizar item do minecart no inventario do jogador
@@ -159,7 +169,7 @@ public class InventoryEvent implements Listener {
                                     player.sendMessage(ChatColor.RED + "Você não possui XP suficiente!");
                                 }
                             } else {
-                                player.sendMessage(ChatColor.RED + "Seu inventário está cheio. Libere espaço antes de usar seu frasco.");
+                                player.sendMessage(ChatColor.RED + "Seu inventário está cheio. Libere espaço antes de adquirir seu frasco.");
                             }
                         }
                     }
@@ -167,8 +177,6 @@ public class InventoryEvent implements Listener {
                     // Sistema livro de Encantamentos Avançado quando Clicado com Botão Esquerdo
                     if (item.getType() == Material.BOOK && item.hasItemMeta()) {
                         ItemMeta meta = item.getItemMeta();
-                        String eBookAdvancedType = "Avançado";
-                        String eBookSimpleType = "Simples"
 
                         if (meta.hasLore()) {
                             List<String> lore = meta.getLore();
@@ -178,17 +186,7 @@ public class InventoryEvent implements Listener {
                                     int eBookAdvancedCost = 3500;
                                     int xp = player.getTotalExperience();
 
-                                    ItemStack existingBook = null;
-                                    for (ItemStack stack : inventoryContents) {
-                                        if (stack != null && stack.getType() == Material.BOOK) {
-                                            if (stack.getAmount() < 64) {
-                                                existingBook = stack;
-                                                break;
-                                            }
-                                        }
-                                    }
-
-                                    if (existingBook != null || player.getInventory().firstEmpty() != -1) {
+                                    if (isValidStackBook(player, item, eBookAdvancedType) || player.getInventory().firstEmpty() != -1) {
                                         if (xp >= eBookAdvancedCost) {
                                             // Remover o xp do player
                                             player.setTotalExperience(xp - eBookAdvancedCost);
@@ -212,35 +210,23 @@ public class InventoryEvent implements Listener {
                                             player.sendMessage(ChatColor.RED + "Você não possui XP suficiente!");
                                         }
                                     } else {
-                                        player.sendMessage(ChatColor.RED + "Seu inventário está cheio. Libere espaço antes de usar seu livro.");
+                                        player.sendMessage(ChatColor.RED + "Seu inventário está cheio. Libere espaço antes de adquirir seu livro.");
                                     }
-                                }
-
-                                if() {
-                                    int eBookSimpleCost = 3500;
+                                } else if(loreLine.equals(ChatColor.GRAY + "Tipo: " + ChatColor.WHITE + eBookSimpleType)) {
+                                    int eBookSimpleCost = 1500;
                                     int xp = player.getTotalExperience();
 
-                                    ItemStack existingBook = null;
-                                    for (ItemStack stack : inventoryContents) {
-                                        if (stack != null && stack.getType() == Material.BOOK) {
-                                            if (stack.getAmount() < 64) {
-                                                existingBook = stack;
-                                                break;
-                                            }
-                                        }
-                                    }
-
-                                    if (existingBook != null || player.getInventory().firstEmpty() != -1) {
-                                        if (xp >= eBookAdvancedCost) {
+                                    if (isValidStackBook(player, item, eBookSimpleType) || player.getInventory().firstEmpty() != -1) {
+                                        if (xp >= eBookSimpleCost) {
                                             // Remover o xp do player
-                                            player.setTotalExperience(xp - eBookAdvancedCost);
+                                            player.setTotalExperience(xp - eBookSimpleCost);
                                             player.setLevel(0);
 
                                             // Criar um Livro de Encantamentos do Tipo Avançado
-                                            ItemStack eBookAdvanced = createCustomBook(eBookAdvancedType);
+                                            ItemStack eBookSimple = createCustomBook(eBookSimpleType);
 
                                             // Add livro ao inv
-                                            player.getInventory().addItem(eBookAdvanced);
+                                            player.getInventory().addItem(eBookSimple);
 
                                             updateMinecartItem(player);
                                             updateXpTotal(player);
@@ -248,15 +234,18 @@ public class InventoryEvent implements Listener {
 
                                             player.sendMessage(ChatColor.GREEN + "Você adquiriu um " + ChatColor.YELLOW +
                                                     "Livro Encantado" + ChatColor.GREEN + " do tipo " +
-                                                    ChatColor.YELLOW + eBookAdvancedType);
+                                                    ChatColor.YELLOW + eBookSimpleType);
                                         } else {
                                             event.setCancelled(true);
                                             player.sendMessage(ChatColor.RED + "Você não possui XP suficiente!");
                                         }
                                     } else {
-                                        player.sendMessage(ChatColor.RED + "Seu inventário está cheio. Libere espaço antes de usar seu livro.");
+                                        player.sendMessage(ChatColor.RED + "Seu inventário está cheio. Libere espaço antes de adquirir seu livro.");
                                     }
+                                } {
+
                                 }
+
                                 break;
                             }
                         }
@@ -266,23 +255,90 @@ public class InventoryEvent implements Listener {
                 if (event.getClickedInventory().equals(openLower)) {
                     event.setCancelled(true);
                 } else {
-                    // Sistema livro de Encantamentos Avaçando quando Clicado com Botão Direito
+                    // Sistema livro de Encantamentos quando Clicado com Botão Direito
                     if (item.getType() == Material.BOOK && event.isRightClick()) {
                         ItemMeta meta = item.getItemMeta();
                         if (meta.hasLore()) {
                             List<String> lore = meta.getLore();
                             // Verificar se a lore contem as linhas especificas
-                            if (lore.contains(ChatColor.GRAY + "Tipo: " + ChatColor.WHITE + "Avançado")) {
+                            if (lore.contains(ChatColor.GRAY + "Tipo: " + ChatColor.WHITE + eBookAdvancedType)) {
                                 // Abrir um novo GUI
                                 AdvancedEnchantsGUI advancedEnchantsGUI = new AdvancedEnchantsGUI();
                                 advancedEnchantsGUI.AdvancedEnchantInventory(player);
+                            } else if (lore.contains(ChatColor.GRAY + "Tipo: " + ChatColor.WHITE + eBookSimpleType)) {
+                                // Abrir um novo GUI
+                                SimpleEnchantsGUI simpleEnchantsGUI = new SimpleEnchantsGUI();
+                                simpleEnchantsGUI.SimpleEnchantInventory(player);
+                            } else if(lore.contains(ChatColor.GRAY + "Tipo: " + ChatColor.WHITE + eBookNormalType)) {
+                                // Abrir um novo GUI
+                                NormalEnchantsGUI normalEnchantsGUI = new NormalEnchantsGUI();
+                                normalEnchantsGUI.NormalEnchantInventory(player);
                             }
-                        }
+                         }
                     }
                 }
             }
         }
     }
+
+    private boolean isValidStackFrask(Player player, ItemStack item, String eFraskType) {
+        ItemStack[] inventoryContents = player.getInventory().getContents();
+
+        ItemMeta meta = item.getItemMeta();
+
+        if (!meta.hasDisplayName()) {
+            return false;
+        }
+
+        String expectedName = ChatColor.YELLOW + eFraskType;
+
+        ItemStack existingFrask = null;
+
+        for (ItemStack stack : inventoryContents) {
+            if(stack != null && stack.getType() == Material.EXP_BOTTLE) {
+                ItemMeta stackMeta = stack.getItemMeta();
+                if (stackMeta != null && stackMeta.hasDisplayName() &&
+                        stackMeta.getDisplayName().contains(expectedName)) {
+                    if (stack.getAmount() < 64) {
+                        existingFrask = stack;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return existingFrask != null;
+    }
+
+    private boolean isValidStackBook(Player player, ItemStack item, String eBookType) {
+        ItemStack[] inventoryContents = player.getInventory().getContents();
+
+        ItemMeta meta = item.getItemMeta();
+
+        if (!meta.hasLore()) {
+            return false; // Não tem lore
+        }
+
+        String expectedLore = ChatColor.GRAY + "Tipo: " + ChatColor.WHITE + eBookType;
+
+        ItemStack existingBook = null;
+
+        for (ItemStack stack : inventoryContents) {
+            if(stack != null && stack.getType() == Material.BOOK) {
+                ItemMeta stackMeta = stack.getItemMeta();
+                if (stackMeta != null && stackMeta.hasLore() &&
+                        stackMeta.getLore().contains(expectedLore)) {
+                    if (stack.getAmount() < 64) {
+                        existingBook = stack;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return existingBook != null;
+    }
+
 
     private void updateMinecartItem(Player player) {
         int xp = player.getTotalExperience();
@@ -348,9 +404,15 @@ public class InventoryEvent implements Listener {
         Player player = event.getPlayer();
         ItemStack item = player.getInventory().getItemInHand();
         ItemMeta frasco = item.getItemMeta();
+        String totalFraskType = "Frasco de Experiência";
+        String advancedFraskType = "Frasco de Experiência Avançado";
+        String normalFraskType = "Frasco de Experiência Normal";
+        String simpleFraskType = "Frasco de Experiência Simples";
+
 
         if(event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            if(customXpBottle(item)) {
+            if(customXpBottle(totalFraskType, item) || customXpBottle(advancedFraskType, item)
+                    || customXpBottle(normalFraskType, item) || customXpBottle(simpleFraskType, item)) {
                 int xpAmount = getStoredExperience(item);
 
                 if(xpAmount > 0) {
@@ -378,18 +440,18 @@ public class InventoryEvent implements Listener {
         }
     }
 
-    // Verificar se um item é um frasco de xp custom
-        private boolean customXpBottle(ItemStack item) {
+    // Verificar se um item é um frasco de xp custom total
+        private boolean customXpBottle(String nameBottle,ItemStack item) {
             if(item.getType() == Material.EXP_BOTTLE && item.hasItemMeta()) {
                 ItemMeta meta = item.getItemMeta();
-                if(meta.hasDisplayName() && meta.getDisplayName().equals(ChatColor.YELLOW + "Frasco de Experiência")) {
+                if(meta.hasDisplayName() && meta.getDisplayName().equals(ChatColor.YELLOW + nameBottle)) {
                     return true;
                 }
             }
             return false;
         }
 
-        // Obter a quantidade de xp armazenada em um frasco de xp
+        // Obter a quantidade de xp armazenada em um frasco de xp total
         private int getStoredExperience(ItemStack item) {
             if (item.hasItemMeta() && item.getItemMeta().hasLore()) {
                 List<String> lore = item.getItemMeta().getLore();
@@ -410,10 +472,10 @@ public class InventoryEvent implements Listener {
         }
 
         // Criar um frasco de xp custom com a quant de xp
-        private ItemStack createCustomXpBottle(int xpAmount) {
+        private ItemStack createCustomXpBottle(String nameXpBottle, int xpAmount) {
             ItemStack xpBottle = new ItemStack(Material.EXP_BOTTLE, 1);
             ItemMeta meta = xpBottle.getItemMeta();
-            meta.setDisplayName(ChatColor.YELLOW + "Frasco de Experiência");
+            meta.setDisplayName(ChatColor.YELLOW + nameXpBottle);
             List<String> lore = new ArrayList<>();
             lore.add(ChatColor.WHITE + "Custo: " + ChatColor.GREEN + xpAmount);
             meta.setLore(lore);

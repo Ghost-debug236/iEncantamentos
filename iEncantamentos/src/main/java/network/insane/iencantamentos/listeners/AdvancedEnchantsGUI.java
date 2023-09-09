@@ -27,7 +27,8 @@ public class AdvancedEnchantsGUI implements Listener {
         Enchantment protection = Enchantment.PROTECTION_ENVIRONMENTAL;
         // Fire Protection
         Enchantment protectionFire = Enchantment.PROTECTION_FIRE;
-
+        // Unbreaking
+        Enchantment unbreaking = Enchantment.DURABILITY;
         // Sharpness
         Enchantment sharpness = Enchantment.DAMAGE_ALL;
 
@@ -38,17 +39,17 @@ public class AdvancedEnchantsGUI implements Listener {
         p5.setItemMeta(p5meta);
         i.setItem(10, p5);
 
-        ItemStack p4 = new ItemStack(Material.ENCHANTED_BOOK);
-        EnchantmentStorageMeta p4meta = (EnchantmentStorageMeta) p4.getItemMeta();
-        p4meta.addStoredEnchant(protection, level4, true);
-        p4.setItemMeta(p4meta);
-        i.setItem(11, p4);
-
         ItemStack pFire4 = new ItemStack(Material.ENCHANTED_BOOK);
         EnchantmentStorageMeta pFire4Meta = (EnchantmentStorageMeta) pFire4.getItemMeta();
         pFire4Meta.addStoredEnchant(protectionFire, level4, true);
         pFire4.setItemMeta(pFire4Meta);
-        i.setItem(12, pFire4);
+        i.setItem(11, pFire4);
+
+        ItemStack unbreaking5 = new ItemStack(Material.ENCHANTED_BOOK);
+        EnchantmentStorageMeta unbreaking5Meta = (EnchantmentStorageMeta) unbreaking5.getItemMeta();
+        unbreaking5Meta.addStoredEnchant(unbreaking, level5, true);
+        unbreaking5.setItemMeta(unbreaking5Meta);
+        i.setItem(12, unbreaking5);
 
         ItemStack s5 = new ItemStack(Material.ENCHANTED_BOOK);
         EnchantmentStorageMeta s5Meta = (EnchantmentStorageMeta) s5.getItemMeta();

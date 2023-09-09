@@ -4,3 +4,4 @@ main: 'network.insane.iencantamentos.Main'
 
 commands:
   ie:
+  reciclar:
